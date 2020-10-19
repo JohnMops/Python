@@ -5,14 +5,8 @@ import json
 
 http = urllib3.PoolManager()
 
-#group_id="sg-0d6f236aab66853ba"
-
 def get_cloudflare_ip_list():
-    """
-    Call the CloudFlare API to fetch their server IPs used for webhooks
-    :rtype: list
-    :return: List of IPs
-    """
+
     response = http.request('GET','https://api.cloudflare.com/client/v4/ips')
     ips = json.loads(response.data.decode('utf-8'))
     if 'result' in ips and 'ipv4_cidrs' in ips['result']:
@@ -22,12 +16,7 @@ def get_cloudflare_ip_list():
 
 
 def get_aws_security_group(group_id):
-    """
-    Return the defined Security Group
-    :param group_id:
-    :type group_id: str
-    :return:
-    """
+
     ec2 = boto3.resource('ec2')
     group = ec2.SecurityGroup(os.environ['group_id'])
     if group.group_id == group_id:
@@ -37,13 +26,7 @@ def get_aws_security_group(group_id):
 
 
 def check_rule_exists(rules, address, port):
-    """
-    Check if the rule currently exists
-    :param rules:
-    :param address:
-    :param port:
-    :return:
-    """
+
     for rule in rules:
         for ip_range in rule['IpRanges']:
             if ip_range['CidrIp'] == address and rule['FromPort'] == port:
@@ -52,14 +35,7 @@ def check_rule_exists(rules, address, port):
 
 
 def add_rule(group, address, port, description):
-    """
-    Add the IP address and port to the security group
-    :param group:
-    :param address:
-    :param port:
-    :param description:
-    :return:
-    """
+
     permissions = [
         {
             'IpProtocol': 'tcp',
@@ -78,12 +54,6 @@ def add_rule(group, address, port, description):
 
 
 def lambda_handler(event, context):
-    """
-    AWS lambda main func
-    :param event:
-    :param context:
-    :return:
-    """
 
     ports = [80,443]
 
