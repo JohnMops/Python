@@ -4,21 +4,30 @@ region = 'us-east-1'
 transfer_region = 'us-west-2'
 parameters_final = []
 
-def get_resources_from(ssm_details):
-    results = ssm_details['Parameters']
-    resources = [result for result in results]
-    next_token = ssm_details.get('NextToken', None)
-    return resources, next_token
-
 def main():
     config = boto3.client('ssm', region_name=region)
-    next_token = ' '
     resources = []
-    while next_token is not None:
-        ssm_details = config.describe_parameters(MaxResults=50, NextToken=next_token)
-        current_batch, next_token = get_resources_from(ssm_details)
+    ssm_details = config.describe_parameters(MaxResults=50)
+
+    results = ssm_details['Parameters']
+    resources = [result for result in results]
+    next_token = ssm_details['NextToken']
+    print(next_token)
+
+    current_batch = resources
+    print(current_batch)
+    while next_token != "":
+        ssm_details = config.describe_parameters(MaxResults=50)
+
+        results = ssm_details['Parameters']
+        resources = [result for result in results]
+        next_token = ssm_details['NextToken']
+        print(next_token)
+
+        current_batch = resources
+        print(current_batch)
         resources += current_batch
-    return resources
+        return resources
 
 
 
@@ -46,4 +55,3 @@ def lambda_handler(event, context):
     parameters = main()
     final_list = get_parameter_with_values(parameters, region, parameters_final)
     upload_parameters(final_list, transfer_region)
-
