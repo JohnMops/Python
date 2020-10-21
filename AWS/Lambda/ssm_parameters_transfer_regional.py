@@ -17,7 +17,7 @@ def main():
     current_batch = resources
     print(current_batch)
     while next_token != "":
-        ssm_details = config.describe_parameters(MaxResults=50)
+        ssm_details = config.describe_parameters(MaxResults=50, NextToken=ssm_details['NextToken'])
 
         results = ssm_details['Parameters']
         resources = [result for result in results]
