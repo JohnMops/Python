@@ -28,7 +28,12 @@ for ami in response['Snapshots']:
 print(len(final)) # checks the amount of snapshots in the list
 
 for i in range(len(final)):
-    client.delete_snapshot(
-        SnapshotId=final[i]
-    )
+    try:
+        client.delete_snapshot(
+            SnapshotId=final[i]
+        )
+    except IndexError as err:
+        print(final[i]+ "issue")
+    finally:
+        continue
 
