@@ -29,6 +29,6 @@ print(len(final)) # checks the amount of snapshots in the list
 
 for i in range(len(final)):
     client.delete_snapshot(
-        SnapshotId=i
+        SnapshotId=final[i]
     )
 
