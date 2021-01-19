@@ -2,32 +2,34 @@ import boto3
 import pprint
 import os
 
-profile = "iris-acceptance"
+profile = "iris-research"
 
 client = boto3.session.Session(profile_name=profile, region_name="us-east-1").client('secretsmanager')
 
+def append_to_list(r, s_list):
+    for k in range(len(r['SecretList'])):
+        s_list.append(r['SecretList'][k]['Name'])
 
 r = client.list_secrets(
-    MaxResults=1,
+    MaxResults=20,
 )
 
 s_list = []
 
-for i in range(len(r['SecretList'])):
-    s_list.append(r['SecretList'][i]['Name'])
+append_to_list(r, s_list)
 
 while 'NextToken' in r:
     r = client.list_secrets(
-        MaxResults=1,
+        MaxResults=20,
         NextToken=r['NextToken']
     )
-    for k in range(len(r['SecretList'])):
-        s_list.append(r['SecretList'][k]['Name'])
+    append_to_list(r, s_list)
 
-
+print(os.system('aws sts get-caller-identity --profile iris-research'))
+pprint.pprint(s_list)
 for d in range(len(s_list)):
     client.delete_secret(
         SecretId=s_list[d],
         ForceDeleteWithoutRecovery=True
     )
-    print("deleting " + s_list[k])
+    print("deleting " + s_list[d])
