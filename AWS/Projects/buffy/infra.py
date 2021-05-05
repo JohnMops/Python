@@ -183,7 +183,6 @@ def list_load_balancers_internal():
             lb_list_internal.append(lb)
     if not lb_list_internal:
         print(colored("[WARNING] No Load Balancers detected", "red"))
-        sys.exit()
     for lb in lb_list_internal:
         print(f"  [*] {lb['LoadBalancerArn']}")
         if lb['State']['Code'] != 'active':
@@ -206,7 +205,8 @@ def list_load_balancers_internal_subnets():
     for lb in client.describe_load_balancers()['LoadBalancers']:
         if lb['Scheme'] == 'internal':
             lb_list_external.append(lb)
-        sys.exit()
+    if not lb_list_external:
+        print(colored("[WARNING] No Load Balancers detected", "red"))
     sub_list = []
     for i in lb_list_external:
         for k in i['AvailabilityZones']:
@@ -244,6 +244,8 @@ def list_load_balancers_external_subnets():
     for lb in client.describe_load_balancers()['LoadBalancers']:
         if lb['Scheme'] == 'internet-facing':
             lb_list_external.append(lb)
+    if not lb_list_external:
+        print(colored("[WARNING] No Load Balancers detected", "red"))
     sub_list = []
     for i in lb_list_external:
         for k in i['AvailabilityZones']:
