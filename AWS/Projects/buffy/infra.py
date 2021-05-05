@@ -316,12 +316,12 @@ def route53_info(zone_names):
             print(f"      [*] Zone ID: {r['HostedZone']['Id'].strip('/hostedzone/')}")
 
 
-# print(colored('[SYSTEM] Checking EKS subnets...', 'yellow'))
-# cluster_subnets = get_cluster_info(cluster_name=cluster_name)
-# print(f"  [*] Cluster subnets are: {cluster_subnets['cluster']['resourcesVpcConfig']['subnetIds']}")
-# print(colored('[SYSTEM] Checking EKS VPC...', 'yellow'))
-# cluster_vpc = cluster_subnets['cluster']['resourcesVpcConfig']['vpcId']
-# print(f"  [*] Cluster VPC is: {cluster_vpc}")
+print(colored('[SYSTEM] Checking EKS subnets...', 'yellow'))
+cluster_subnets = get_cluster_info(cluster_name=cluster_name)
+print(f"  [*] Cluster subnets are: {cluster_subnets['cluster']['resourcesVpcConfig']['subnetIds']}")
+print(colored('[SYSTEM] Checking EKS VPC...', 'yellow'))
+cluster_vpc = cluster_subnets['cluster']['resourcesVpcConfig']['vpcId']
+print(f"  [*] Cluster VPC is: {cluster_vpc}")
 list_lb_private = list_load_balancers_internal()
 list_lb_public = list_load_balancers_external()
 private_load_balancer_info(list_lb_private=list_lb_private)
