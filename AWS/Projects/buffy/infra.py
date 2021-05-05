@@ -1,6 +1,7 @@
 import pprint
 import boto3
 import os
+import sys
 from termcolor import colored
 from  more_itertools import unique_everseen
 import kubernetes
@@ -26,10 +27,15 @@ else:
 
 def get_cluster_info(cluster_name):
     client = session.client('eks')
-    cluster_info = client.describe_cluster(
-        name=cluster_name
-    )
-    return cluster_info
+    try:
+        cluster_info = client.describe_cluster(
+            name=cluster_name
+        )
+        return cluster_info
+    except:
+        print(colored(f"[WARNING] No cluster {cluster_name} found", "red"))
+        sys.exit()
+
 
 def cluster_public_subnets(public_subnets):
     client = session.client('ec2')
