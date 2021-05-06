@@ -365,6 +365,35 @@ def cluster_instances():
     for group in range(len(attached['SecurityGroups'])):
         print(colored(f"  [*] {attached['SecurityGroups'][group]['GroupId']}:"))
         print(colored(f"      [*] Description: {attached['SecurityGroups'][group]['Description']}", "yellow"))
+    cluster_list = []
+    for reservation in instance_iterator['Reservations']:
+        for instance in reservation['Instances']:
+            cluster_list.append(instance['InstanceId'])
+    print(colored('[CHECK] Finished', 'green'))
+    print(colored('[SYSTEM] Getting a list of All EC2 Instances...', 'yellow'))
+    all_instances = client.describe_instances()
+    all_list = []
+    for reservation in all_instances['Reservations']:
+        for instance in reservation['Instances']:
+            all_list.append(instance['InstanceId'])
+    print(colored('[CHECK] Finished', 'green'))
+    diff_list = []
+    diff_list = list(set(cluster_list).symmetric_difference(set(all_list)))
+    print(colored('[SYSTEM] Getting Non-Cluster related EC2 Instances', 'yellow'))
+    if diff_list:
+        print(colored('[WARNING] Non-Cluster Instances detected', 'red'))
+        diff_instances = client.describe_instances(
+            InstanceIds=diff_list,
+        )
+        for reservation in diff_instances['Reservations']:
+            for instance in reservation['Instances']:
+                try:
+                    print(f"  [*] {instance['Tags']}")
+                    print(colored(f"      [*] {instance['InstanceId']}", "yellow"))
+                except:
+                    print(colored(f"  [*] {instance['InstanceId']}", 'yellow'))
+    else:
+        print(colored("[CHECK] No non-cluster related instances found"))
     return list(unique_everseen(sg_list))
 
 
