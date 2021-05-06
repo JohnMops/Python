@@ -393,7 +393,7 @@ def cluster_instances():
                 except:
                     print(colored(f"  [*] {instance['InstanceId']}", 'yellow'))
     else:
-        print(colored("[CHECK] No non-cluster related instances found"))
+        print(colored("[CHECK] No non-cluster related instances found", "green"))
     return list(unique_everseen(sg_list))
 
 
