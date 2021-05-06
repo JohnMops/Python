@@ -7,11 +7,8 @@ from more_itertools import unique_everseen
 import kubernetes
 
 ### divide to classes to run separate parts
-### get tf state from s3 per env
-### sync with terraform state - Pizdez!
 ### check target group port vs istio service nodePort and print port
 
-### show all deployments and the revision
 
 
 profile = os.environ.get('AWS_PROFILE')
