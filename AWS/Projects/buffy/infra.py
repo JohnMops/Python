@@ -157,7 +157,7 @@ def get_public_route_tables(pub_subnets):
             ]
         )
     except IndexError as e:
-        print(colored("[WARNING] No LB Public Subnets detected", "red"))
+        print(colored("[WARNING] No LB Public Subnets related to Public LB detected", "red"))
 
     try:
         for route in route_table_info["RouteTables"][0]["Routes"]:
