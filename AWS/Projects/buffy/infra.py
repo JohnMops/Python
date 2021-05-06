@@ -8,6 +8,11 @@ import kubernetes
 
 ### divide to classes to run separate parts
 ### check target group port vs istio service nodePort and print port
+### add s3 buckets and it's volume > 100gb
+### iam - check user's credential usage time
+### aws secret manager amount - ?
+### Instances = check public IP, show CPU
+### Route53 zone ns servers VS dig on the hosted zone
 
 
 
@@ -387,11 +392,11 @@ def cluster_instances():
         )
         for reservation in diff_instances['Reservations']:
             for instance in reservation['Instances']:
+                print(colored(f"  [*] {instance['InstanceId']}", "yellow"))
                 try:
-                    print(f"  [*] {instance['Tags']}")
-                    print(colored(f"      [*] {instance['InstanceId']}", "yellow"))
+                    print(f"     [*] {instance['Tags']}")
                 except:
-                    print(colored(f"  [*] {instance['InstanceId']}", 'yellow'))
+                    continue
     else:
         print(colored("[CHECK] No non-cluster related instances found", "green"))
     return list(unique_everseen(sg_list))
