@@ -160,7 +160,7 @@ def get_public_route_tables(pub_subnets):
             ]
         )
     except IndexError as e:
-        print(colored("[WARNING] No Appropriate Public Subnets detected", "red"))
+        print(colored("[WARNING] No LB Public Subnets detected", "red"))
 
     try:
         for route in route_table_info["RouteTables"][0]["Routes"]:
@@ -172,7 +172,7 @@ def get_public_route_tables(pub_subnets):
         else:
             print(colored('[WARNING] No Public Subnets with route to IGW', 'red'))
     except:
-        print(colored("[WARNING] No Appropriate Public Subnets to examine", "red"))
+        print(colored("[WARNING] No LB Public Subnets to examine", "red"))
 
 def list_load_balancers_internal():
     client = session.client('elbv2')
@@ -206,7 +206,7 @@ def list_load_balancers_internal_subnets():
         if lb['Scheme'] == 'internal':
             lb_list_external.append(lb)
     if not lb_list_external:
-        print(colored("[WARNING] No Load Balancers detected", "red"))
+        print(colored("[WARNING] No Private Load Balancers detected", "red"))
     sub_list = []
     for i in lb_list_external:
         for k in i['AvailabilityZones']:
@@ -221,7 +221,7 @@ def list_load_balancers_external():
         if lb['Scheme'] == 'internet-facing':
             lb_list_external.append(lb)
     if not lb_list_external:
-        print(colored("[WARNING] No Load Balancers detected", "red"))
+        print(colored("[WARNING] No Public Load Balancers detected", "red"))
     for lb in lb_list_external:
         print(f"  [*] {lb['LoadBalancerArn']}")
         if lb['State']['Code'] != 'active':
@@ -245,7 +245,7 @@ def list_load_balancers_external_subnets():
         if lb['Scheme'] == 'internet-facing':
             lb_list_external.append(lb)
     if not lb_list_external:
-        print(colored("[WARNING] No Load Balancers detected", "red"))
+        print(colored("[WARNING] No Public Load Balancers detected", "red"))
     sub_list = []
     for i in lb_list_external:
         for k in i['AvailabilityZones']:
@@ -257,23 +257,27 @@ def private_load_balancer_info(list_lb_private):
     tags_list = []
     print(colored('[SYSTEM] Getting Private Load Balancer Tags...', 'yellow'))
     dict_list = []
-    for i in range(len(list_lb_private)):
-        tags_list.append((client.describe_tags(
-            ResourceArns=[list_lb_private[i]['LoadBalancerArn']]
-        )))
-    for o in range(len(tags_list)):
-        if any(d['Key'] == f'kubernetes.io/cluster/{cluster_name}' for d in tags_list[o]['TagDescriptions'][0]['Tags']):
-            if any(d['Value'].startswith("istio-") for d in tags_list[o]['TagDescriptions'][0]['Tags']):
-                print(colored(f"  [*] {tags_list[o]['TagDescriptions'][0]['ResourceArn']} - Istio LB", "yellow"))
-                print(f"      [*] {tags_list[o]['TagDescriptions'][0]['Tags']}")
-            else:
-                print(f"  [*] {tags_list[o]['TagDescriptions'][0]['ResourceArn']}")
-                print(f"      [*] {tags_list[o]['TagDescriptions'][0]['Tags']}")
-    for h in range(len(tags_list)):
-        if not any(d['Key'] == f'kubernetes.io/cluster/{cluster_name}' for d in tags_list[h]['TagDescriptions'][0]['Tags']):
-            print(colored(f"[WARNING] Non-Cluster Load Balancer Detected", "red"))
-            print(f"  [*] {tags_list[h]['TagDescriptions'][0]['ResourceArn']}")
-            print(f"      [*] {tags_list[h]['TagDescriptions'][0]['Tags']}")
+    if list_lb_private:
+        for i in range(len(list_lb_private)):
+            tags_list.append((client.describe_tags(
+                ResourceArns=[list_lb_private[i]['LoadBalancerArn']]
+            )))
+        for o in range(len(tags_list)):
+            if any(d['Key'] == f'kubernetes.io/cluster/{cluster_name}' for d in tags_list[o]['TagDescriptions'][0]['Tags']):
+                if any(d['Value'].startswith("istio-") for d in tags_list[o]['TagDescriptions'][0]['Tags']):
+                    print(colored(f"  [*] {tags_list[o]['TagDescriptions'][0]['ResourceArn']} - Istio LB", "yellow"))
+                    print(f"      [*] {tags_list[o]['TagDescriptions'][0]['Tags']}")
+                else:
+                    print(f"  [*] {tags_list[o]['TagDescriptions'][0]['ResourceArn']}")
+                    print(f"      [*] {tags_list[o]['TagDescriptions'][0]['Tags']}")
+        for h in range(len(tags_list)):
+            if not any(d['Key'] == f'kubernetes.io/cluster/{cluster_name}' for d in tags_list[h]['TagDescriptions'][0]['Tags']):
+                print(colored(f"[WARNING] Non-Cluster Load Balancer Detected", "red"))
+                print(f"  [*] {tags_list[h]['TagDescriptions'][0]['ResourceArn']}")
+                print(f"      [*] {tags_list[h]['TagDescriptions'][0]['Tags']}")
+    else:
+        print(colored("[WARNING] No Load Balancers detected", "red"))
+
 
 def public_load_balancer_info(list_lb_public):
     client = session.client('elbv2')
@@ -321,6 +325,30 @@ def route53_info(zone_names):
             print(colored(f"      [*] Public Zone", "yellow"))
             print(f"      [*] Zone ID: {r['HostedZone']['Id'].strip('/hostedzone/')}")
 
+def get_security_groups():
+    client = session.client('ec2')
+    print(colored('[SYSTEM] Checking Cluster Security Group for [0.0.0.0/0] open rules...', 'yellow'))
+    r = client.describe_security_groups(
+        Filters=[
+            {
+                'Name': f'tag:kubernetes.io/cluster/{cluster_name}',
+                'Values': ['owned', 'shared']
+            },
+          ]
+         )
+    if r:
+        for g in range(len(r['SecurityGroups'])):
+            for p in range(len(r['SecurityGroups'][g]['IpPermissions'])):
+                for i in range(len(r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'])):
+                    if r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp'] == '0.0.0.0/0':
+                        print(colored(f"[WARNING] {r['SecurityGroups'][g]['GroupId']} open:", "red"))
+                        print(colored(f"      [*] {r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp']}", "yellow"))
+                        print(colored(f"      [*] Description: {r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['Description']}", "yellow"))
+    else:
+        print(colored(f"[SYSTEM] No Cluster Related Security group found", "yellow"))
+
+
+
 
 print(colored('[SYSTEM] Checking EKS subnets...', 'yellow'))
 cluster_subnets = get_cluster_info(cluster_name=cluster_name)
@@ -339,9 +367,11 @@ public_subnets = cluster_public_subnets(lb_public_subnets)
 get_public_route_tables(lb_public_subnets)
 print(colored('[SYSTEM] Checking Private Subnets...', 'yellow'))
 private_subnets = cluster_private_subnets(lb_private_subnets)
+get_security_groups()
 print(colored('[SYSTEM] Checking Route53 Hosted Zones...', 'yellow'))
 zone_ids = route53_list()
 print(colored('[SYSTEM] Getting Hosted Zones Information...', 'yellow'))
 route53_info(zone_ids)
+
 
 
