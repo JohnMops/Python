@@ -5,6 +5,8 @@ import sys
 from termcolor import colored
 from more_itertools import unique_everseen
 import kubernetes
+import pydig
+
 
 ### divide to classes to run separate parts
 ### check target group port vs istio service nodePort and print port
@@ -315,10 +317,12 @@ def route53_list():
 
 def route53_info(zone_names):
     client = session.client('route53')
+    ns_names = []
     for i in zone_names:
         r = client.get_hosted_zone(
             Id=i
         )
+        ns_names.append(r['HostedZone']['Name'])
         pprint.pprint(f" [*] {r['HostedZone']['Name']}")
         if r['HostedZone']['Config']['PrivateZone']:
             print(colored(f"      [*] Private Zone", "green"))
@@ -326,6 +330,24 @@ def route53_info(zone_names):
         else:
             print(colored(f"      [*] Public Zone", "yellow"))
             print(f"      [*] Zone ID: {r['HostedZone']['Id'].strip('/hostedzone/')}")
+
+        response = client.list_resource_record_sets(
+            HostedZoneId=i,
+            StartRecordName=r['HostedZone']['Name'],
+            StartRecordType='NS',
+            MaxItems='1'
+        )
+        ns_list = []
+        for record in response['ResourceRecordSets'][0]['ResourceRecords']:
+            ns_list.append(record['Value'])
+        dig_list = pydig.query(r['HostedZone']['Name'], 'NS')
+        if set(dig_list) & set(ns_list):
+            print(colored(f"      [*] Valid Zone - DIG Check returned matched NS", "green"))
+            continue
+        else:
+            print(colored(f"      [*] Invalid Zone - DIG Check Failed", "red"))
+
+
 
 def attached_sg(sg_list):
     client = session.client('ec2')
