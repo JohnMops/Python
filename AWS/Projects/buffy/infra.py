@@ -71,9 +71,9 @@ def cluster_public_subnets(public_subnets):
             print(colored(f"[WARNING] {public_subnets[sub]} is missing [kubernetes.io/cluster/{cluster_name}]:['shared'] Tag ", "red"))
 
     if not elb_tag_ids:
-        print(colored("[WARNING] No Public Subnets with [kubernetes.io/role/elb]:[1] Tag detected", "red"))
+        print(colored("[WARNING] No Public Subnets related to Public LB with [kubernetes.io/role/elb]:[1] Tag detected", "red"))
     if not cluster_tag_ids:
-        print(colored("[WARNING] No Public Subnets with [kubernetes.io/cluster/{cluster_name}]:['shared'] Tag detected", "red"))
+        print(colored("[WARNING] No Public Subnets related to Public LB with [kubernetes.io/cluster/{cluster_name}]:['shared'] Tag detected", "red"))
 
     sub_list = []
     for sub in range(len(elb_tag[0]['Subnets'])):
@@ -341,6 +341,7 @@ def get_security_groups():
                         print(colored(f"[WARNING] {r['SecurityGroups'][g]['GroupId']} open:", "red"))
                         print(colored(f"      [*] {r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp']}", "yellow"))
                         print(colored(f"      [*] Description: {r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['Description']}", "yellow"))
+                        print(colored(f"      [*] Protocol: {r['SecurityGroups'][g]['IpPermissions'][p]['IpProtocol']}", "yellow"))
     else:
         print(colored(f"[SYSTEM] No Cluster Related Security group found", "yellow"))
 
@@ -359,10 +360,10 @@ private_load_balancer_info(list_lb_private=list_lb_private)
 public_load_balancer_info(list_lb_public=list_lb_public)
 lb_public_subnets = list_load_balancers_external_subnets()
 lb_private_subnets = list_load_balancers_internal_subnets()
-print(colored('[SYSTEM] Checking Public Subnets...', 'yellow'))
+print(colored('[SYSTEM] Checking Public LB Subnets...', 'yellow'))
 public_subnets = cluster_public_subnets(lb_public_subnets)
 get_public_route_tables(lb_public_subnets)
-print(colored('[SYSTEM] Checking Private Subnets...', 'yellow'))
+print(colored('[SYSTEM] Checking Private LB Subnets...', 'yellow'))
 private_subnets = cluster_private_subnets(lb_private_subnets)
 get_security_groups()
 print(colored('[SYSTEM] Checking Route53 Hosted Zones...', 'yellow'))
