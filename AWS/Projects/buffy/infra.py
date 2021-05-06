@@ -322,28 +322,51 @@ def route53_info(zone_names):
             print(colored(f"      [*] Public Zone", "yellow"))
             print(f"      [*] Zone ID: {r['HostedZone']['Id'].strip('/hostedzone/')}")
 
-def get_security_groups():
+def attached_sg(sg_list):
     client = session.client('ec2')
     print(colored('[SYSTEM] Checking Cluster Security Group for [0.0.0.0/0] open rules...', 'yellow'))
-    r = client.describe_security_groups(
+    attached = client.describe_security_groups(
+        GroupIds=sg_list,
+    )
+    if attached:
+        for g in range(len(attached['SecurityGroups'])):
+            for p in range(len(attached['SecurityGroups'][g]['IpPermissions'])):
+                for i in range(len(attached['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'])):
+                    if attached['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp'] == '0.0.0.0/0':
+                        print(colored(f"[WARNING] {attached['SecurityGroups'][g]['GroupId']} open:", "red"))
+                        try:
+                            print(colored(f"  [*] {attached['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp']}", "yellow"))
+                            print(colored(f"  [*] Description: {attached['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['Description']}", "yellow"))
+                            print(colored(f"  [*] Protocol: {attached['SecurityGroups'][g]['IpPermissions'][p]['IpProtocol']}", "yellow"))
+                        except:
+                            continue
+    else:
+        print(colored(f"[SYSTEM] No Cluster Related Security group found", "yellow"))
+
+def cluster_instances():
+    client = session.client('ec2')
+    print(colored('[SYSTEM] Getting a list of Security groups attached to Cluster Nodes...', 'yellow'))
+    instance_iterator = client.describe_instances(
         Filters=[
             {
                 'Name': f'tag:kubernetes.io/cluster/{cluster_name}',
-                'Values': ['owned', 'shared']
-            },
+                'Values': ['owned'],
+            }
           ]
-         )
-    if r:
-        for g in range(len(r['SecurityGroups'])):
-            for p in range(len(r['SecurityGroups'][g]['IpPermissions'])):
-                for i in range(len(r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'])):
-                    if r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp'] == '0.0.0.0/0':
-                        print(colored(f"[WARNING] {r['SecurityGroups'][g]['GroupId']} open:", "red"))
-                        print(colored(f"      [*] {r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['CidrIp']}", "yellow"))
-                        print(colored(f"      [*] Description: {r['SecurityGroups'][g]['IpPermissions'][p]['IpRanges'][i]['Description']}", "yellow"))
-                        print(colored(f"      [*] Protocol: {r['SecurityGroups'][g]['IpPermissions'][p]['IpProtocol']}", "yellow"))
-    else:
-        print(colored(f"[SYSTEM] No Cluster Related Security group found", "yellow"))
+    )
+    sg_list = []
+    for reservation in instance_iterator['Reservations']:
+        for instance in reservation['Instances']:
+            for group in instance['SecurityGroups']:
+                sg_list.append(group['GroupId'])
+    attached = client.describe_security_groups(
+        GroupIds=list(unique_everseen(sg_list)),
+    )
+    for group in range(len(attached['SecurityGroups'])):
+        print(colored(f"  [*] {attached['SecurityGroups'][group]['GroupId']}:"))
+        print(colored(f"      [*] Description: {attached['SecurityGroups'][group]['Description']}", "yellow"))
+    return list(unique_everseen(sg_list))
+
 
 
 
@@ -365,11 +388,14 @@ public_subnets = cluster_public_subnets(lb_public_subnets)
 get_public_route_tables(lb_public_subnets)
 print(colored('[SYSTEM] Checking Private LB Subnets...', 'yellow'))
 private_subnets = cluster_private_subnets(lb_private_subnets)
-get_security_groups()
+sg_list = cluster_instances()
+attached_sg(sg_list)
 print(colored('[SYSTEM] Checking Route53 Hosted Zones...', 'yellow'))
 zone_ids = route53_list()
 print(colored('[SYSTEM] Getting Hosted Zones Information...', 'yellow'))
 route53_info(zone_ids)
+
+
 
 
 
