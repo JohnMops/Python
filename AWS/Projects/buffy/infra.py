@@ -14,7 +14,6 @@ import pydig
 ### iam - check user's credential usage time
 ### aws secret manager amount - ?
 ### Instances = check public IP, show CPU
-### Route53 zone ns servers VS dig on the hosted zone
 
 
 
@@ -149,7 +148,9 @@ def cluster_private_subnets(private_subnets):
 
 
 def get_public_route_tables(pub_subnets):
+    print('----------------------------------------------------------')
     print(colored("[SYSTEM] Checking Public Subnets for IGW Route Table...", "yellow"))
+    print('----------------------------------------------------------')
     client = session.client('ec2')
     is_public = False
     try:
@@ -181,7 +182,9 @@ def get_public_route_tables(pub_subnets):
 def list_load_balancers_internal():
     client = session.client('elbv2')
     lb_list_internal = []
+    print('----------------------------------------------------------')
     print(colored("[SYSTEM] Getting Private Load Balancers...", "yellow"))
+    print('----------------------------------------------------------')
     for lb in client.describe_load_balancers()['LoadBalancers']:
         if lb['Scheme'] == 'internal':
             lb_list_internal.append(lb)
@@ -220,7 +223,9 @@ def list_load_balancers_internal_subnets():
 def list_load_balancers_external():
     client = session.client('elbv2')
     lb_list_external = []
+    print('----------------------------------------------------------')
     print(colored("[SYSTEM] Getting Public Load Balancers...", "yellow"))
+    print('----------------------------------------------------------')
     for lb in client.describe_load_balancers()['LoadBalancers']:
         if lb['Scheme'] == 'internet-facing':
             lb_list_external.append(lb)
@@ -259,7 +264,9 @@ def list_load_balancers_external_subnets():
 def private_load_balancer_info(list_lb_private):
     client = session.client('elbv2')
     tags_list = []
+    print('----------------------------------------------------------')
     print(colored('[SYSTEM] Getting Private Load Balancer Tags...', 'yellow'))
+    print('----------------------------------------------------------')
     dict_list = []
     if list_lb_private:
         for i in range(len(list_lb_private)):
@@ -286,7 +293,9 @@ def private_load_balancer_info(list_lb_private):
 def public_load_balancer_info(list_lb_public):
     client = session.client('elbv2')
     tags_list = []
+    print('----------------------------------------------------------')
     print(colored('[SYSTEM] Getting Public Load Balancer Tags...', 'yellow'))
+    print('----------------------------------------------------------')
     dict_list = []
     for i in range(len(list_lb_public)):
         tags_list.append((client.describe_tags(
@@ -351,7 +360,9 @@ def route53_info(zone_names):
 
 def attached_sg(sg_list):
     client = session.client('ec2')
+    print('----------------------------------------------------------')
     print(colored('[SYSTEM] Checking Cluster Security Group for [0.0.0.0/0] open rules...', 'yellow'))
+    print('----------------------------------------------------------')
     attached = client.describe_security_groups(
         GroupIds=sg_list,
     )
@@ -372,7 +383,9 @@ def attached_sg(sg_list):
 
 def cluster_instances():
     client = session.client('ec2')
+    print('----------------------------------------------------------')
     print(colored('[SYSTEM] Getting a list of Security groups attached to Cluster Nodes...', 'yellow'))
+    print('----------------------------------------------------------')
     instance_iterator = client.describe_instances(
         Filters=[
             {
@@ -397,7 +410,9 @@ def cluster_instances():
         for instance in reservation['Instances']:
             cluster_list.append(instance['InstanceId'])
     print(colored('[CHECK] Finished', 'green'))
+    print('----------------------------------------------------------')
     print(colored('[SYSTEM] Getting a list of All EC2 Instances...', 'yellow'))
+    print('----------------------------------------------------------')
     all_instances = client.describe_instances()
     all_list = []
     for reservation in all_instances['Reservations']:
@@ -406,7 +421,9 @@ def cluster_instances():
     print(colored('[CHECK] Finished', 'green'))
     diff_list = []
     diff_list = list(set(cluster_list).symmetric_difference(set(all_list)))
+    print('----------------------------------------------------------')
     print(colored('[SYSTEM] Getting Non-Cluster related EC2 Instances', 'yellow'))
+    print('----------------------------------------------------------')
     if diff_list:
         print(colored('[WARNING] Non-Cluster Instances detected', 'red'))
         diff_instances = client.describe_instances(
@@ -426,11 +443,14 @@ def cluster_instances():
 
 
 
-
+print('----------------------------------------------------------')
 print(colored('[SYSTEM] Checking EKS subnets...', 'yellow'))
+print('----------------------------------------------------------')
 cluster_subnets = get_cluster_info(cluster_name=cluster_name)
 print(f"  [*] Cluster subnets are: {cluster_subnets['cluster']['resourcesVpcConfig']['subnetIds']}")
+print('----------------------------------------------------------')
 print(colored('[SYSTEM] Checking EKS VPC...', 'yellow'))
+print('----------------------------------------------------------')
 cluster_vpc = cluster_subnets['cluster']['resourcesVpcConfig']['vpcId']
 print(f"  [*] Cluster VPC is: {cluster_vpc}")
 list_lb_private = list_load_balancers_internal()
@@ -439,16 +459,24 @@ private_load_balancer_info(list_lb_private=list_lb_private)
 public_load_balancer_info(list_lb_public=list_lb_public)
 lb_public_subnets = list_load_balancers_external_subnets()
 lb_private_subnets = list_load_balancers_internal_subnets()
+print('----------------------------------------------------------')
 print(colored('[SYSTEM] Checking Public LB Subnets...', 'yellow'))
+print('----------------------------------------------------------')
 public_subnets = cluster_public_subnets(lb_public_subnets)
 get_public_route_tables(lb_public_subnets)
+print('----------------------------------------------------------')
 print(colored('[SYSTEM] Checking Private LB Subnets...', 'yellow'))
+print('----------------------------------------------------------')
 private_subnets = cluster_private_subnets(lb_private_subnets)
 sg_list = cluster_instances()
 attached_sg(sg_list)
+print('----------------------------------------------------------')
 print(colored('[SYSTEM] Checking Route53 Hosted Zones...', 'yellow'))
+print('----------------------------------------------------------')
 zone_ids = route53_list()
+print('----------------------------------------------------------')
 print(colored('[SYSTEM] Getting Hosted Zones Information...', 'yellow'))
+print('----------------------------------------------------------')
 route53_info(zone_ids)
 
 
