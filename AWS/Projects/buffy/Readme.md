@@ -33,7 +33,7 @@ export AWS_PROFILE=<profile_name>
 9. Will check Route53 Zones
    - Will show Zone Type,ID
 10. Will perform a DIG test to the zone domain and show which zone is answering the request    
-
+11. Check all IAM user's access keys and alerts if not used for more than 60 days
 
 
 
