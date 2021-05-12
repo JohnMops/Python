@@ -6,6 +6,7 @@ from termcolor import colored
 from more_itertools import unique_everseen
 import kubernetes
 import pydig
+from datetime import date
 
 
 ### divide to classes to run separate parts
@@ -440,7 +441,22 @@ def cluster_instances():
         print(colored("[CHECK] No non-cluster related instances found", "green"))
     return list(unique_everseen(sg_list))
 
+def last_used_keys():
+    client = session.client('iam')
+    response = client.list_users()
+    print('-----------------------------------------------------------------------')
+    print(colored('[SYSTEM] Checking last used Access Keys', 'yellow'))
+    print('-----------------------------------------------------------------------')
+    for user in range(len(response['Users'])):
 
+        access_key = client.list_access_keys(UserName=response['Users'][user].get('UserName'))
+        accesskeydate = access_key['AccessKeyMetadata'][0]['CreateDate'].date()
+        currentdate = date.today()
+        active_days = currentdate - accesskeydate
+        if int(active_days.days) > 60:
+            print(colored('[WARNING] Unused Keys detected', 'red'))
+            print(f"  [*] {response['Users'][user].get('UserName')}: \n      [*] {access_key['AccessKeyMetadata'][0]['AccessKeyId']}"
+                  f" was not in use for the past 60 days")
 
 
 print('-----------------------------------------------------------------------')
@@ -478,6 +494,7 @@ print('-----------------------------------------------------------------------')
 print(colored('[SYSTEM] Getting Hosted Zones Information...', 'yellow'))
 print('-----------------------------------------------------------------------')
 route53_info(zone_ids)
+last_used_keys()
 
 
 
