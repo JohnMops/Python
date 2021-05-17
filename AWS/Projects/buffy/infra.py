@@ -451,9 +451,12 @@ def last_used_keys():
 
         access_key = client.list_access_keys(UserName=response['Users'][user].get('UserName'))
         # pprint.pprint(access_key)
-        last_used = client.get_access_key_last_used(
-            AccessKeyId=access_key['AccessKeyMetadata'][0].get('AccessKeyId')
-        )
+        try:
+            last_used = client.get_access_key_last_used(
+                AccessKeyId=access_key['AccessKeyMetadata'][0].get('AccessKeyId')
+            )
+        except:
+            continue
         try:
             # pprint.pprint(last_used['AccessKeyLastUsed']['LastUsedDate'])
             accesskeydate = last_used['AccessKeyLastUsed']['LastUsedDate'].date()
