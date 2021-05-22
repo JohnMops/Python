@@ -33,10 +33,6 @@ list_lb_private = aws.list_load_balancers_internal()
 aws.public_load_balancer_info(list_lb_public)
 aws.private_load_balancer_info(list_lb_private)
 
-lb_public_subnets = aws.list_load_balancers_external_subnets()
-lb_private_subnets = aws.list_load_balancers_internal_subnets()
-public_subnets = aws.cluster_public_subnets(lb_public_subnets)
-aws.cluster_private_subnets(lb_private_subnets)
 aws.get_public_route_tables(public_subnets)
 
 sg_list = aws.cluster_instances()
