@@ -7,7 +7,7 @@ mkdir /custom
 2. Run the docker image locally:
 
 ```bash
-run -d --name ps -e POSTGRES_PASSWORD=5961772 \ 
+run -d --name ps -e POSTGRES_PASSWORD=<your_pass> \ 
 -e PGDATA=/var/lib/postgresql/data/pgdata \ 
 -v /custom \ 
 -p 5432:5432 \ 
