@@ -63,6 +63,17 @@ class Database():
 
         conn.close()
 
+    def update_deployment(self, data):
+        sql = f'''UPDATE deployments
+                 SET revision = '{data['revision']}'
+                 WHERE name = '{data['deployment']}';
+              '''
+        conn = Database.db_connect(self)
+        cur = conn.cursor()
+        cur.execute(sql, (data['revision'], data['deployment'],))
+        conn.commit()
+        conn.close()
+
     def create_tables(self):
         """ create tables in the PostgreSQL database"""
         commands = (

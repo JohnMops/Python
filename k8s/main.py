@@ -27,6 +27,10 @@ db_client.insert_deployments(namespace_list)
 
 conn = db_client.db_connect()
 
-run_server(conn, server_config.get('port'), server_config.get('host'))
+run_server(conn,
+           server_config.get('port'),
+           server_config.get('host'),
+           db_client,
+           namespace_list)
 
 
