@@ -30,16 +30,18 @@ aws.cluster_private_subnets(private_subnets)
 
 list_lb_public = aws.list_load_balancers_external()
 list_lb_private = aws.list_load_balancers_internal()
+
 aws.public_load_balancer_info(list_lb_public)
 aws.private_load_balancer_info(list_lb_private)
-
 aws.get_public_route_tables(public_subnets)
 
 sg_list = aws.cluster_instances()
-aws.attached_sg(sg_list)
-zone_ids = aws.route53_list()
-aws.route53_info(zone_ids)
 
+aws.attached_sg(sg_list)
+
+zone_ids = aws.route53_list()
+
+aws.route53_info(zone_ids)
 aws.last_used_keys()
 
 
