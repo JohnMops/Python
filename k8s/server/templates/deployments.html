@@ -1,0 +1,19 @@
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Namespace</th>
+        <th>Revision</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in output_data %}
+    <tr>
+        <td>{{row[0]}}</td>
+        <td>{{row[1]}}</td>
+        <td>{{row[2]}}</td>
+        <td>{{row[3]}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
