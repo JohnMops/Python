@@ -13,7 +13,7 @@ import aws_module.functions as aws
 profile = os.environ.get('AWS_PROFILE')
 cluster_name = os.environ.get('CLUSTER_NAME')
 region = os.environ.get('AWS_REGION')
-aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID'),
+aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 session = ses.Session(profile, region, aws_access_key_id, aws_secret_access_key)

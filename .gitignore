@@ -1,3 +1,4 @@
 /Study/*
 /AWS/Projects/buffy/some.py
 **/**/__pycache__
+/AWS/Scripts/create-asg.py
