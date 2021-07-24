@@ -1,8 +1,9 @@
 from kubernetes import client, config
 
-class Kube():
 
+class Kube():
     cfg = config.load_kube_config()
+
     # config.incluster_config()
 
     def __init__(self):
@@ -15,6 +16,7 @@ class Kube():
         for n in response.items:
             namespace_list.append(f"{n.metadata.name}")
         return namespace_list
+
 
 if __name__ == '__main__':
     Kube()

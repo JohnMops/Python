@@ -109,6 +109,6 @@ class Database():
 
         conn.close()
 
+
 if __name__ == '__main__':
     Database()
-
