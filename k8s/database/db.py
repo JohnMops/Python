@@ -101,7 +101,7 @@ class Database():
                 sql = f"""INSERT INTO deployments(name, namespace, revision)
                       SELECT '{d.metadata.name}', '{n}', '{d.metadata.generation}'
                       WHERE NOT EXISTS (
-                        SELECT 1 FROM deployments WHERE name='{n}'
+                        SELECT 1 FROM deployments WHERE name='{d.metadata.name}'
                     );
                        """
                 cur.execute(sql)
