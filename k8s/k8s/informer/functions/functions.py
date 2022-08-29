@@ -124,8 +124,12 @@ def deployment_info_hpa(kubeconfig, args):
                             if re.search(args.deployment_name, crd['items'][o]['metadata']['name']):
                                 print(colored(f'Keda Scaled Object: ', "yellow"), end="")
                                 print(crd['items'][o]['metadata']['name'])
+                                print(
+                                    '------------------------------------------------------------------------------------------------------------------------')
         if not found:
             print(colored(f"HPA for Deployment '{args.deployment_name}' not found ", "red"))
+            print(
+                '------------------------------------------------------------------------------------------------------------------------')
 
     except client.exceptions.ApiException:
         print(colored(f"Deployment '{args.deployment_name}' not found ", "red"))
