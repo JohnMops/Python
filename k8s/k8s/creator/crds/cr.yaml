@@ -1,0 +1,17 @@
+apiVersion: creator.com/v1
+kind: GcpTemplate
+metadata:
+  name: mock-template
+  namespace: default
+spec:
+  projectId: mock-id
+  gcpServiceAccountName: mock-sa
+  namespace: mock-namespace
+  k8sServiceAccountName: mock-k8s-sa
+  permissions:
+    - roles/bigquery.admin
+    - roles/iam.serviceAccountTokenCreator
+  buckets:
+    - mock-bucket
+
+

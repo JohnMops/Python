@@ -1,0 +1,44 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gcptemplates.creator.com
+  namespace: default
+spec:
+  scope: Cluster
+  group: creator.com
+  names:
+    kind: GcpTemplate
+    plural: gcptemplates
+    singular: gcptemplate
+    shortNames:
+      - gcpt
+      - gcpts
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                projectId:
+                  type: string
+                gcpServiceAccountName:
+                  type: string
+                buckets:
+                  type: array
+                  items:
+                    type: string
+                namespace:
+                  type: string
+                k8sServiceAccountName:
+                  type: string
+                permissions:
+                  type: array
+                  items:
+                    type: string
+
+

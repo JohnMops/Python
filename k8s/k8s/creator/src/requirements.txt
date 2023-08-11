@@ -1,0 +1,5 @@
+google-cloud-iam
+kopf
+google-cloud
+logging
+google-api-python-client
