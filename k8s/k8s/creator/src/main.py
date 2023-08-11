@@ -31,27 +31,33 @@ def create_fn(spec, name, namespace, logger, **kwargs):
             template=template
         )
         time.sleep(3)
+
+    check_sa = gcpClient.check_service_account(
+        template=template
+    )
+
+    if check_sa:
         gcpClient.set_workload_identity(
             template=template
         )
 
+    if check_sa:
+        policy = gcpClient.get_project_iam_policy(
+            template=template
+        )
 
-    policy = gcpClient.get_project_iam_policy(
-        template=template
-    )
+        gcpClient.modify_policy_add_role(
+            template=template,
+            permissions=template.permissions,
+            bucket_names=template.bucket_names,
+            policy=policy,
+        )
 
-    gcpClient.modify_policy_add_role(
-        template=template,
-        permissions=template.permissions,
-        bucket_names=template.bucket_names,
-        policy=policy,
-    )
-
-    gcpClient.set_policy(
-        template=template,
-        policy=policy
-    )
-    time.sleep(3)
+        gcpClient.set_policy(
+            template=template,
+            policy=policy
+        )
+        time.sleep(3)
 
 
 @kopf.on.delete('gcptemplates', group="creator.com")
@@ -60,34 +66,41 @@ def delete_fn(spec, name, namespace, logger, **kwargs):
         spec=spec
     )
 
+
     gcpClient = common.GCPClient()
 
-    policy = gcpClient.get_project_iam_policy(
+    check_sa = gcpClient.check_service_account(
         template=template
     )
 
-    gcpClient.remove_role_from_member(
-        template=template,
-        policy=policy,
-        permissions=template.permissions
-    )
+    if check_sa:
 
-    gcpClient.set_policy(
-        template=template,
-        policy=policy
-    )
+        policy = gcpClient.get_project_iam_policy(
+            template=template
+        )
 
-    gcpClient.remove_bucket_iam_member(
-        template=template,
-        bucket_names=template.bucket_names
-    )
+        gcpClient.remove_role_from_member(
+            template=template,
+            policy=policy,
+            permissions=template.permissions
+        )
+
+        gcpClient.set_policy(
+            template=template,
+            policy=policy
+        )
+
+        gcpClient.remove_bucket_iam_member(
+            template=template,
+            bucket_names=template.bucket_names
+        )
 
 
-    gcpClient.delete_service_account(
-        template=template
-    )
+        gcpClient.delete_service_account(
+            template=template
+        )
 
-    time.sleep(3)
+        time.sleep(3)
 
 
 

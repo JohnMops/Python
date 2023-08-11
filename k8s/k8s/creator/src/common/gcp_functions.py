@@ -13,26 +13,27 @@ class GCPClient:
         self.__storageClient = storage.Client()
 
     def check_service_account(self, template):
+        display_name = f"Created by Operator for {template.gcp_service_account_name}"
         try:
             request = self.__iamClient.projects().serviceAccounts().get(
                 name=f'projects/{template.project_id}/serviceAccounts/{template.gcp_service_account_name}{template.email}'
             ).execute()
-            if request['displayName'] == template.gcp_service_account_name:
+            if request['displayName'] == display_name:
                 logging.info(f"Service Account: {template.gcp_service_account_name}{template.email} Already exists")
                 return True
             else:
-                logging.info(f"Service Account: {template.gcp_service_account_name}{template.email} Does Not exists")
                 return False
         except Exception as e:
             pass
 
     def create_service_account(self, template):
+        display_name = f"Created by Operator for {template.gcp_service_account_name}"
         try:
             service_account = self.__iamClient.projects().serviceAccounts().create(
                 name="projects/" + template.project_id,
                 body={
                     "accountId": template.gcp_service_account_name,
-                    "serviceAccount": {"displayName": template.gcp_service_account_name}
+                    "serviceAccount": {"displayName": f"{display_name}"}
                 }).execute()
 
             logging.info("Created service account: " + service_account["email"])
