@@ -17,6 +17,10 @@ that starts with the bucket name to keep with the least privileged attitude.
 remain strapped with the workload identity for you to add permissions to at a later time
 6. Removing the Custom Resource will remove all the binds from all policies for this service account
 and delete the service account from your project
+7. Migrate existing service accounts by changing the display name to match the string:
+"Created by Operator for _your service account name_" or by simply deleting them all together.
+The operator will take control over the service accounts with the appropriate display name or create new once
+if none exist.
 
 ### Notes: 
 1. The number of workers (threads) this operator opens was limited to 1 to avoid GCP API collisions when creating multiple Custom Resources.
