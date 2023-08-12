@@ -26,7 +26,11 @@ def create_fn(spec, name, namespace, logger, **kwargs):
     check_sa = gcpClient.check_service_account(
         template=template
     )
-    if not check_sa:
+    check_sa_owner = gcpClient.check_service_account_owner(
+        template=template
+    )
+
+    if not check_sa and not check_sa_owner:
         gcpClient.create_service_account(
             template=template
         )
@@ -57,7 +61,7 @@ def create_fn(spec, name, namespace, logger, **kwargs):
             template=template,
             policy=policy
         )
-        time.sleep(3)
+        time.sleep(5)
 
 
 @kopf.on.delete('gcptemplates', group="creator.com")
@@ -70,6 +74,9 @@ def delete_fn(spec, name, namespace, logger, **kwargs):
     gcpClient = common.GCPClient()
 
     check_sa = gcpClient.check_service_account(
+        template=template
+    )
+    check_sa_owner = gcpClient.check_service_account_owner(
         template=template
     )
 

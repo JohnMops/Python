@@ -19,6 +19,20 @@ class GCPClient:
                 name=f'projects/{template.project_id}/serviceAccounts/{template.gcp_service_account_name}{template.email}'
             ).execute()
             if request['displayName'] == display_name:
+                logging.info(f"Service Account Created by the operator: {template.gcp_service_account_name}{template.email} Already exists")
+                return True
+            else:
+                return False
+        except Exception as e:
+            pass
+
+    def check_service_account_owner(self, template):
+        display_name = f"Created by Operator for {template.gcp_service_account_name}"
+        try:
+            request = self.__iamClient.projects().serviceAccounts().get(
+                name=f'projects/{template.project_id}/serviceAccounts/{template.gcp_service_account_name}{template.email}'
+            ).execute()
+            if request['displayName'] and request['displayName'] != display_name:
                 logging.info(f"Service Account: {template.gcp_service_account_name}{template.email} Already exists")
                 return True
             else:
@@ -140,7 +154,8 @@ class GCPClient:
                 resource=template.project_id,
                 body={"policy": policy}
             ).execute()
-        except:
+        except Exception as e:
+            logging.error(e)
             raise kopf.TemporaryError(f"Another Set Policy operation is performed: Operator will retry", delay=10)
 
         return policy
@@ -171,6 +186,7 @@ class GCPClient:
                 gcp_bucket.set_iam_policy(policy)
 
                 logging.info(f"{template.member} is now a {role} on {bucket_names[i]} bucket")
+                time.sleep(2)
         except:
             raise kopf.TemporaryError(f"Another operation in performed on bucket: {bucket_names[i]}. Operator will retry", delay=10)
     def remove_role_from_member(self, template, policy, permissions):
