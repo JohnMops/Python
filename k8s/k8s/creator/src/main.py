@@ -15,6 +15,7 @@ import common
 def configure(settings: kopf.OperatorSettings, **_):
     settings.execution.max_workers = 1
 
+
 @kopf.on.resume('gcptemplates', group="creator.com")
 @kopf.on.create('gcptemplates', group="creator.com")
 def create_fn(spec, name, namespace, logger, **kwargs):
@@ -70,7 +71,6 @@ def delete_fn(spec, name, namespace, logger, **kwargs):
         spec=spec
     )
 
-
     gcpClient = common.GCPClient()
 
     check_sa = gcpClient.check_service_account(
@@ -81,7 +81,6 @@ def delete_fn(spec, name, namespace, logger, **kwargs):
     )
 
     if check_sa:
-
         policy = gcpClient.get_project_iam_policy(
             template=template
         )
@@ -102,13 +101,11 @@ def delete_fn(spec, name, namespace, logger, **kwargs):
             bucket_names=template.bucket_names
         )
 
-
         gcpClient.delete_service_account(
             template=template
         )
 
         time.sleep(3)
-
 
 
 @kopf.on.update('gcptemplates', group="creator.com", field='spec.permissions')
@@ -162,9 +159,7 @@ def update_buckets_fn(spec, old, new, name, namespace, logger, **kwargs):
         return
 
     updated_buckets = list(set(old).difference(new))
-    logging.info(f"Removing permissins from {updated_buckets}")
-
-
+    logging.info(f"Removing permissions from {updated_buckets}")
 
     policy = gcpClient.get_project_iam_policy(
         template=template
@@ -180,4 +175,3 @@ def update_buckets_fn(spec, old, new, name, namespace, logger, **kwargs):
         policy=policy,
         permissions=template.permissions
     )
-
