@@ -1,13 +1,23 @@
 Python Repository
 
-Welcome to the Python repository! This project contains various scripts and modules related to different functionalities and services. Below are the main folders and their links for easy navigation:
+Welcome to the Python repository by JohnMops. This repository contains various Python scripts and projects. Below is an organized list of the main folders and their respective subfolders.
 
-Folders
+AWS
 
 AWS
 Decorators
-GCP/GCS-Uploader
+
+Decorators
+GCP
+
+GCS-Uploader
 K8s
+
+K8s
+Other Files
+
+.gitignore
+README.md
 Getting Started
 
 To get started with any of the scripts, navigate to the respective folder and follow the instructions provided in the scripts or their respective README files (if available).
