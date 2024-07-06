@@ -1,0 +1,71 @@
+{
+    "info": [
+        {
+            "id": 123,
+            "title": "Dog Breeds",
+            "types": [
+                {
+                    "breed": "Golden Retriever",
+                    "age": 4,
+                    "name": "Max",
+                    "temperament": "Friendly"
+                },
+                {
+                    "breed": "German Shepherd",
+                    "age": 5,
+                    "name": "Rex",
+                    "temperament": "Loyal"
+                },
+                {
+                    "breed": "Beagle",
+                    "age": 3,
+                    "name": "Bella",
+                    "temperament": "Curious"
+                },
+                {
+                    "breed": "Poodle",
+                    "age": 2,
+                    "name": "Coco",
+                    "temperament": "Intelligent"
+                },
+                {
+                    "breed": "Bulldog",
+                    "age": 7,
+                    "name": "Bruno",
+                    "temperament": "Calm"
+                },
+                {
+                    "breed": "Siberian Husky",
+                    "age": 6,
+                    "name": "Luna",
+                    "temperament": "Energetic"
+                },
+                {
+                    "breed": "Dachshund",
+                    "age": 4,
+                    "name": "Oscar",
+                    "temperament": "Playful"
+                },
+                {
+                    "breed": "Boxer",
+                    "age": 5,
+                    "name": "Rocky",
+                    "temperament": "Protective"
+                },
+                {
+                    "breed": "Labrador Retriever",
+                    "age": 3,
+                    "name": "Daisy",
+                    "temperament": "Gentle"
+                },
+                {
+                    "breed": "Chihuahua",
+                    "age": 6,
+                    "name": "Tiny",
+                    "temperament": "Feisty"
+                }
+            ]
+            
+        }
+    ]
+}
